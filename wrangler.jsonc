@@ -12,6 +12,13 @@
     "not_found_handling": "single-page-application",
     "run_worker_first": ["/api", "/api/*"]
   },
-  "d1_databases": [],
+ "d1_databases": [
+  {
+    "binding": "DB",
+    "database_name": "remember-you-rate-limit",
+    "database_id": "3b049e2f-e993-41af-a893-ed0ce3eb9c90",
+    "migrations_dir": "drizzle"
+  }
+],
   "observability": { "enabled": false }
 }
