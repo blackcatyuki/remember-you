@@ -1,0 +1,21 @@
+{
+  "name": "remember-you",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "node scripts/build-v3.mjs",
+    "test": "node --test src/*.test.js",
+    "test:v3": "node --test src/v3.test.js server/*.test.js",
+    "build:cloudflare": "node scripts/build-cloudflare.mjs",
+    "check:cloudflare": "node --test server/cloudflare.test.js",
+    "deploy:cloudflare": "node scripts/deploy-cloudflare.mjs",
+    "check:wrangler": "npx --yes wrangler@4.161.0 deploy --dry-run --outdir .cf-dry-run"
+  },
+  "dependencies": {
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "vite": "6.1.0"
+  }
+}
