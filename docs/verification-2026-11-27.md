@@ -7,7 +7,7 @@
 | GitHub 实际来源 | main `18ac1f0b4a467751d2b2992fa2be0682c95868c4`，原仓库私有；两条 main 提交 |
 | 线上网站 | 无登录 GET 首页和 `/api/ai-status` 成功 |
 | 线上 AI 初检 | enabled=false, configured=false, limiterReady=false, ready=false |
-| 真实 API / 费用 | 新 Key 已由开发者自行保存为运行时 Secret；ready=true。修复 Workers 不支持 redirect:error 后，文字解析返回 HTTP200 / 3条候选，送礼返回 HTTP200 / 3个方向及真实记录ID；账单未核对，完整免费验收仍未通过 |
+| 真实 API / 费用 | 新 Key 已由开发者自行保存为运行时 Secret；ready=true。修复 Workers 不支持 redirect:error 后，文字解析返回 HTTP200 / 3条候选，送礼返回 HTTP200 / 3个方向及真实记录ID；开发者在聊天中确认本次测试账单扣费为0（由开发者人工核对，非代理读取账单）；不代表未来永久免费 |
 | 生产 D1 | Cloudflare 设置已显示 DB → 既有数据库；控制台只读查询确认 ai_quota / d1_migrations 表和三列 schema 存在；实际并发测试得到 CONCURRENCY_LIMIT / QUOTA_EXCEEDED 两种 HTTP429，且另一请求 HTTP200；全站每日额度的生产耗尽场景未测试 |
 | 新代码 | JSON 导入、冲突处理、独立示例、隐私说明和 AI 不可用原因 |
 | 自动化 | 28 项通过：备份 3，实际 SQLite 限流 2，重定向安全1，AI / 免费保护 / Cloudflare 相关22；传输使用模拟响应，非服务商实调 |
@@ -18,7 +18,7 @@
 | UI 保持 | src/styles.css 和原首页四张 WebP 素材与 main 对应 blob SHA 一致；仅把新工具放入既有导航弹窗 |
 | 未重复的历史测试 | 人物头像、CRUD、生日和分类历史测试结果不冒充本次新浏览器验收；本次修改未触及这些实现 |
 
-截图位于 `docs/screenshots/`，只包含虚构示例。新提交 af99a57 已经 Cloudflare 自动构建部署成功（Build 0502552c）。匿名 HTTP 已返回新版 index-C8pwu6vX.js，样式 index-ElIC67hU.css 保持一致；独立云浏览器首次访问为空，线上示例入口可进入虚构人物。后续真实文字及送礼调用已成功（均只用虚构偏好），D1 实际拦截亦已成功；GitHub 已设为 Public，匿名 HTTP200 验证通过；服务商账单核对及全站开关实操仍待后续步骤。
+截图位于 `docs/screenshots/`，只包含虚构示例。新提交 af99a57 已经 Cloudflare 自动构建部署成功（Build 0502552c）。匿名 HTTP 已返回新版 index-C8pwu6vX.js，样式 index-ElIC67hU.css 保持一致；独立云浏览器首次访问为空，线上示例入口可进入虚构人物。后续真实文字及送礼调用已成功（均只用虚构偏好），D1 实际拦截亦已成功；GitHub 已设为 Public，匿名 HTTP200 验证通过；开发者已人工核对本次测试账单为0；全站开关实操仍待后续步骤。
 
 ## 免费模型复核
 
