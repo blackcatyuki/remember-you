@@ -18,4 +18,4 @@
 
 若后续发现真密钥泄露，先撤销 / 轮换，再处理完整 Git 历史与缓存；仅删当前文件不够。不要把敏感值粘贴进 issue、聊天、截图或日志。
 
-仓库开发者已授权公开；仍需由开发者在 GitHub Settings → Danger Zone → Change visibility 确认 Public；公开后需以匿名请求验证可访问。此文档不代表仓库已经公开。
+仓库开发者已授权并完成公开；GitHub 返回 private=false，匿名请求仓库页面 HTTP200。学校邮箱按开发者明确同意保留。
