@@ -9,7 +9,7 @@
 - 检查默认 Worker 无人物列表 / 保存 API；人物保存在客户端。AI API 只在明确请求时转发必要字段。
 - Wrangler 的 D1 UUID 是资源标识，不是认证凭据；没有 Cloudflare API Token / AI Key。
 - 原视觉 WebP 的 Git blob SHA 与线上下载一致；本次新增截图为浏览器实拍，仅显示虚构测试人物。
-- 原有提交的 Git author 元数据包含开发者学校邮箱（不是 GitHub noreply 邮箱）。公开仓库会公开该元数据；已向开发者报告，待决定保留或匿名化。未擅自改写历史。
+- 原有提交的 Git author 元数据包含开发者学校邮箱（不是 GitHub noreply 邮箱）。公开仓库会公开该元数据；已向开发者报告，开发者明确同意保留邮箱并公开仓库；不改写历史。
 - 未发现需撤销的真实凭据；这不消除上述邮箱公开风险。
 
 ## 不能由此推出的结论
@@ -18,4 +18,4 @@
 
 若后续发现真密钥泄露，先撤销 / 轮换，再处理完整 Git 历史与缓存；仅删当前文件不够。不要把敏感值粘贴进 issue、聊天、截图或日志。
 
-仓库公开前由开发者在 GitHub Settings → Danger Zone → Change visibility 确认 Public；公开后需以匿名请求验证可访问。此文档不代表仓库已经公开。
+仓库开发者已授权公开；仍需由开发者在 GitHub Settings → Danger Zone → Change visibility 确认 Public；公开后需以匿名请求验证可访问。此文档不代表仓库已经公开。
