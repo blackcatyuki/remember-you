@@ -10,7 +10,7 @@ export function freeConfigValid(env,now=Date.now()){
 export async function verifyFreeModel(env,fetcher=fetch,now=Date.now()){
  if(!freeConfigValid(env,now))stop('免费 AI 尚未完成安全确认或复核已到期，已停止请求；不会切换收费模型。');
  // Never cache prices: check every request, without transmitting the API key.
- const response=await fetcher(CATALOG_URL,{signal:AbortSignal.timeout(8000),cache:'no-store',redirect:'error'});
+ let response;try{response=await fetcher(CATALOG_URL,{signal:AbortSignal.timeout(8000),cache:'no-store',redirect:'error'});}catch{stop('服务端无法连接免费模型目录，已停止请求；请稍后重试，不会切换收费模型。');}
  if(!response.ok)stop('暂时无法核实免费条件，已停止请求。');
  const raw=await response.text();if(raw.length>300000)stop('免费模型目录异常，已停止请求。');
  let list;try{list=JSON.parse(raw);}catch{stop('免费模型目录格式异常，已停止请求。');}
