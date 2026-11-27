@@ -50,13 +50,13 @@ export async function providerJSON(env,{system,data,image,vision=false},fetcher=
  const timeout=Math.min(45000,Math.max(1000,Number(env.AI_TIMEOUT_MS)||30000));const signal=AbortSignal.timeout(timeout);
  const headers={'Authorization':`Bearer ${env.AI_API_KEY}`,'Content-Type':'application/json'};
  {
-  const response=await safeProviderFetch(fetcher,base+'/models',{headers,signal,redirect:'error'},'MODEL_LIST_UNREACHABLE');if(!response.ok)upstreamError(response.status);
+  const response=await safeProviderFetch(fetcher,base+'/models',{headers,signal,redirect:'manual'},'MODEL_LIST_UNREACHABLE');if(!response.ok)upstreamError(response.status);
   const listing=await readJSON(response);if(env.AI_FREE_ONLY==='true'&&Array.isArray(listing.data)&&listing.data.some(m=>m.id!==model))fail(503,'KEY_SCOPE_UNSAFE','请管理员把新密钥的允许模型限制为唯一免费模型；安全确认前已停止请求。');
   if(!Array.isArray(listing.data)||!listing.data.some(m=>m.id===model))fail(503,'MODEL_UNAVAILABLE','配置的模型不在此密钥的可用模型列表中。');
 
  }
  const payload=JSON.stringify(data);const content=image?[{type:'text',text:payload},{type:'image_url',image_url:{url:image}}]:payload;
- const response=await safeProviderFetch(fetcher,base+'/chat/completions',{method:'POST',headers,signal,redirect:'error',body:JSON.stringify({model,messages:[{role:'system',content:system},{role:'user',content}],response_format:{type:'json_object'},stream:false,max_tokens:2048,temperature:.3})},'COMPLETION_UNREACHABLE');
+ const response=await safeProviderFetch(fetcher,base+'/chat/completions',{method:'POST',headers,signal,redirect:'manual',body:JSON.stringify({model,messages:[{role:'system',content:system},{role:'user',content}],response_format:{type:'json_object'},stream:false,max_tokens:2048,temperature:.3})},'COMPLETION_UNREACHABLE');
  if(!response.ok)upstreamError(response.status);
  const raw=await readJSON(response);if(raw.choices?.[0]?.finish_reason==='length')fail(502,'TRUNCATED_OUTPUT','AI 输出被截断，请减少输入后重试。');
  const result=raw.choices?.[0]?.message?.content;if(typeof result!=='string'||result.length>24000)fail(502,'INVALID_AI_OUTPUT','AI 没有返回可解析的 JSON。');
