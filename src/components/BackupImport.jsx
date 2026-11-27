@@ -1,0 +1,10 @@
+import React,{useState,useRef} from 'react';
+import {Modal} from './Common.jsx';
+import {parseBackup,importSummary,mergeBackup,MAX_BACKUP_BYTES} from '../backup.js';
+export default function BackupImport({db,onImport,onClose}){
+ const[data,setData]=useState(null),[error,setError]=useState(''),[policy,setPolicy]=useState('copy'),[busy,setBusy]=useState(false),[ack,setAck]=useState(false);const sequence=useRef(0);
+ const summary=data?importSummary(db,data):null;
+ async function read(e){const f=e.target.files?.[0];e.target.value='';if(!f)return;const seq=++sequence.current;setData(null);setError('');setAck(false);setBusy(true);try{if(!/\.json$/i.test(f.name))throw Error('请选择 .json 备份文件。');if(f.size>MAX_BACKUP_BYTES)throw Error('备份文件最大 4 MB。');const next=parseBackup(await f.text());if(seq===sequence.current)setData(next);}catch(err){if(seq===sequence.current)setError(err.message);}finally{if(seq===sequence.current)setBusy(false);}}
+ function save(){try{const result=mergeBackup(db,data,policy);if(onImport(result.value,result.added,result.skipped))onClose();}catch(err){setError(err.message);}}
+ return <Modal title="导入备份" onClose={onClose}><p>文件只在当前浏览器读取，不发送到服务器。导入前建议先导出当前资料；本次只追加档案，不覆盖现有资料。</p><label className="upload-btn">{busy?'正在校验…':'选择 JSON 备份'}<input type="file" accept=".json,application/json" onChange={read} disabled={busy}/></label><p className="helper">支持记得你 v1 / v2 导出及原始恢复备份，最大 4 MB。</p>{error&&<p className="error" role="alert">{error}</p>}{summary&&<><p>已校验 {summary.total} 位人物，{summary.conflicts.length} 位与现有档案同名或同编号。</p>{summary.conflicts.length>0&&<><p>冲突人物：{summary.conflicts.join('、')}</p><label>如何处理冲突？<select value={policy} onChange={e=>setPolicy(e.target.value)}><option value="copy">保留现有资料，另存为导入副本</option><option value="skip">保留现有资料，跳过冲突人物</option></select></label></>}<label className="checkbox-line"><input type="checkbox" checked={ack} onChange={e=>setAck(e.target.checked)}/>我已确认文件来源和冲突处理方式</label><div className="actions"><button onClick={onClose}>取消</button><button className="primary" disabled={!ack||busy||!summary.total} onClick={save}>确认导入</button></div></>}</Modal>;
+}

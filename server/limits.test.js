@@ -1,0 +1,11 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {DatabaseSync} from 'node:sqlite';import {readFileSync} from 'node:fs';import {reserveQuota,acquireConcurrency} from './limits.js';
+function setup(){const sql=new DatabaseSync(':memory:');sql.exec(readFileSync(new URL('../drizzle/0000_ai_quota.sql',import.meta.url),'utf8'));return {sql,env:{AI_RATE_SALT:'unit-test-only-salt',DB:{prepare:q=>({bind:(...args)=>({first:async()=>sql.prepare(q).get(...args),run:async()=>sql.prepare(q).run(...args)})})}}};}
+const req=ip=>new Request('https://example.test/api/parse-records',{headers:{'CF-Connecting-IP':ip}});
+test('D1 SQL enforces per-IP minute/day and global limits across request instances',async()=>{
+ const {sql,env}=setup();const now=Date.UTC(2026,10,27,1);env.AI_PER_MINUTE=2;await reserveQuota(req('192.0.2.1'),env,now);await reserveQuota(req('192.0.2.1'),env,now);await assert.rejects(reserveQuota(req('192.0.2.1'),env,now),e=>e.code==='QUOTA_EXCEEDED');
+ env.AI_PER_PERSON_DAY=2;await assert.rejects(reserveQuota(req('192.0.2.1'),env,now+60000),e=>e.code==='QUOTA_EXCEEDED');env.AI_DAILY_LIMIT=2;await assert.rejects(reserveQuota(req('192.0.2.2'),env,now),e=>e.code==='QUOTA_EXCEEDED');
+ const rows=sql.prepare('SELECT * FROM ai_quota').all();assert.ok(!JSON.stringify(rows).includes('192.0.2.'));assert.ok(rows.every(x=>Object.keys(x).sort().join(',')==='expires_at,key,used'));sql.close();
+});
+test('D1 concurrency excludes same IP, caps whole site, releases and expires leases',async()=>{
+ const {sql,env}=setup();const now=Date.UTC(2026,10,27,1);const a=await acquireConcurrency(req('192.0.2.1'),env,now);await assert.rejects(acquireConcurrency(req('192.0.2.1'),env,now),e=>e.code==='CONCURRENCY_LIMIT');const b=await acquireConcurrency(req('192.0.2.2'),env,now);await assert.rejects(acquireConcurrency(req('192.0.2.3'),env,now),e=>e.code==='CONCURRENCY_LIMIT');await a();const c=await acquireConcurrency(req('192.0.2.3'),env,now);await b();await c();assert.equal(sql.prepare('SELECT count(*) AS n FROM ai_quota').get().n,0);await acquireConcurrency(req('192.0.2.4'),env,now);const d=await acquireConcurrency(req('192.0.2.4'),env,now+90001);await d();sql.close();
+});

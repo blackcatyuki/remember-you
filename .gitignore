@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.wrangler/
+.cf-dry-run/
+.env*
+!.env.example
+.dev.vars*
+wrangler-debug.log
+*.log
+*.zip
+.DS_Store
