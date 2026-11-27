@@ -10,9 +10,9 @@ export function freeConfigValid(env,now=Date.now()){
 export async function verifyFreeModel(env,fetcher=fetch,now=Date.now()){
  if(!freeConfigValid(env,now))stop('免费 AI 尚未完成安全确认或复核已到期，已停止请求；不会切换收费模型。');
  // Never cache prices: check every request, without transmitting the API key.
- let response;try{response=await fetcher(CATALOG_URL,{signal:AbortSignal.timeout(8000),cache:'no-store',redirect:'manual'});}catch{stop('服务端无法连接免费模型目录，已停止请求；请稍后重试，不会切换收费模型。');}
- if(!response.ok)stop('暂时无法核实免费条件，已停止请求。');
- const raw=await response.text();if(raw.length>300000)stop('免费模型目录异常，已停止请求。');
+ let response;try{response=await fetcher(CATALOG_URL,{signal:AbortSignal.timeout(12000),cache:'no-store',redirect:'manual'});}catch(e){throw new ApiError(e?.name==='TimeoutError'||e?.name==='AbortError'?504:503,e?.name==='TimeoutError'||e?.name==='AbortError'?'FREE_CATALOG_TIMEOUT':'FREE_CATALOG_UNREACHABLE','免费价格目录'+(e?.name==='TimeoutError'||e?.name==='AbortError'?'检查超时（12秒）':'连接失败')+'；未发送生成请求，不会切换收费模型。');}
+ if(!response.ok)stop('免费价格目录返回 HTTP '+response.status+'；未发送生成请求，不会切换收费模型。');
+ let raw;try{raw=await response.text();}catch(e){throw new ApiError(504,'FREE_CATALOG_BODY_TIMEOUT','免费价格目录响应未完整接收；未发送生成请求，请稍后重试。');}if(raw.length>300000)stop('免费模型目录异常，已停止请求。');
  let list;try{list=JSON.parse(raw);}catch{stop('免费模型目录格式异常，已停止请求。');}
  const m=Array.isArray(list)?list.find(m=>m.name===FREE_MODEL):null;
  if(!m||m.is_free!==true||m.available!==true||m.kind!=='chat'||m.virtual!==false||m.price_in_credits!==0||m.price_out_credits!==0||m.price_credits_per_1m!==0||!(m.free_daily_tokens>0))stop('免费模型已下线、免费额度条件改变或存在收费风险，已停止请求。');
